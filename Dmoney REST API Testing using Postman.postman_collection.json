@@ -1,0 +1,1998 @@
+{
+	"info": {
+		"_postman_id": "c254140b-969a-44d9-8bbc-ba98ee33fc1d",
+		"name": "Dmoney REST API Testing using Postman",
+		"description": "Complete automated collection by Syed SM Pranto | 04-Dec-2025  \nAll required scenarios + negative cases",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49377738",
+		"_collection_link": "https://prantosm33-644601.postman.co/workspace/7e4e8900-5ae2-4193-862b-340659b61b4a/collection/49377738-c254140b-969a-44d9-8bbc-ba98ee33fc1d?action=share&source=collection_link&creator=49377738"
+	},
+	"item": [
+		{
+			"name": "01_Authentication",
+			"item": [
+				{
+					"name": "TC01 - Admin Login Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC01 - Status 200 & Login successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var json = pm.response.json();",
+									"    pm.expect(json.message).to.eql(\"Login successful\");",
+									"    pm.collectionVariables.set(\"acess_token\", json.token);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@dmoney.com\",\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC02 - Admin Login with Wrong Password (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC02 - Invalid password rejected\", function () {",
+									"    pm.response.to.have.status(401);});",
+									"",
+									"pm.test(\"Wrong password message!\", function () {",
+									"    const json = pm.response.json();",
+									"    pm.expect(json.message).to.eql(\"Password incorrect\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@dmoney.com\",\n    \"password\": \"wrong1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC03 - Admin Login with Empty Email (negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC03 - Empty email rejected\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"Email/Phone Number cannot be empty.\", function () {",
+									"    const json = pm.response.json();",
+									"    pm.expect(json.message).to.eql(\"Please provide either email or phone_number along with password\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"\",\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02_User_Creation",
+			"item": [
+				{
+					"name": "TC04 - Create Agent",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const lodash=require('lodash') //commonJS",
+									"",
+									"const randomNumber= lodash.random(1000000,9999999)",
+									"const phoneNumber = '0120' + randomNumber.toString()",
+									"console.log(phoneNumber)",
+									"",
+									"pm.collectionVariables.set(\"agent_phoneNum\", phoneNumber)"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC04 - Agent created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"const userId= jsonData.user.id",
+									"pm.collectionVariables.set(\"agent_userId\", userId)",
+									"",
+									"pm.test(\"Verify that user is created\",()=>{",
+									"    pm.expect(jsonData.message).eql(\"User created\")",
+									"} )",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{$randomFullName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"password\": \"1234\",\n  \"phone_number\": \"{{agent_phoneNum}}\",\n  \"nid\": \"123456789\",\n  \"role\": \"Agent\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC05 - Create Agent with Duplicate phone (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC05 - Duplicate phone rejected\", function () {",
+									"    pm.response.to.have.status(208);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Verify that User already exists with that phone number.\",()=>{",
+									"    pm.expect(jsonData.message).eql(\"User already exists\")",
+									"} )"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{$randomFullName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"password\": \"1234\",\n  \"phone_number\": \"{{agent_phoneNum}}\",\n  \"nid\": \"123456789\",\n  \"role\": \"Agent\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC06 - Admin Create Agent with duplicate NID (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC06 - Duplicate NID should be rejected\", function () {",
+									"    pm.response.to.have.status(400); ",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const lodash=require('lodash') //commonJS\r",
+									"\r",
+									"const randomNumber= lodash.random(1000000,9999999)\r",
+									"const phoneNumber = '0120' + randomNumber.toString()\r",
+									"console.log(phoneNumber)\r",
+									"\r",
+									"pm.collectionVariables.set(\"Duplicate_phoneNum\", phoneNumber)"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{$randomFullName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"password\": \"12345\",\n  \"phone_number\": \"{{Duplicate_phoneNum}}\",\n  \"nid\": \"123456789\",\n  \"role\": \"Agent\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC07 -  Admin Create User with Weak Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC07 - Weak password should be rejected (IMPROVEMENT)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const lodash=require('lodash') //commonJS\r",
+									"\r",
+									"const randomNumber= lodash.random(1000000,9999999)\r",
+									"const phoneNumber = '0120' + randomNumber.toString()\r",
+									"console.log(phoneNumber)\r",
+									"\r",
+									"pm.collectionVariables.set(\"extra_phoneNum\", phoneNumber)"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{$randomFullName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"password\": \"1111\",\n  \"phone_number\": \"{{extra_phoneNum}}\",\n  \"nid\": \"123456723\",\n  \"role\": \"Agent\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC08 -  Admin Create Customer 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const lodash=require('lodash') //commonJS",
+									"",
+									"const randomNumber= lodash.random(1000000,9999999)",
+									"const phoneNumber = '0120' + randomNumber.toString()",
+									"console.log(phoneNumber)",
+									"",
+									"pm.collectionVariables.set(\"customer1_phone\", phoneNumber)"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC08 - Customer 1 created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{$randomFullName}}\",\n    \"email\": \"{{$randomEmail}}\",\n    \"password\": \"12345\",\n    \"phone_number\": \"{{customer1_phone}}\",\n    \"nid\": \"9876543210111\",\n    \"role\": \"Customer\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC09 - Admin Create Customer 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const lodash=require('lodash') //commonJS",
+									"",
+									"const randomNumber= lodash.random(1000000,9999999)",
+									"const phoneNumber = '0120' + randomNumber.toString()",
+									"console.log(phoneNumber)",
+									"",
+									"pm.collectionVariables.set(\"customer2_phone\", phoneNumber)"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC09 - Customer 2 created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{$randomFullName}}\",\n    \"email\": \"{{$randomEmail}}\",\n    \"password\": \"12345\",\n    \"phone_number\": \"{{customer2_phone}}\",\n    \"nid\": \"9876543210111\",\n    \"role\": \"Customer\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC10 - Admin Create Merchant",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const lodash=require('lodash') //commonJS",
+									"",
+									"const randomNumber= lodash.random(1000000,9999999)",
+									"const phoneNumber = '0120' + randomNumber.toString()",
+									"console.log(phoneNumber)",
+									"",
+									"pm.collectionVariables.set(\"merchant_phone\", phoneNumber)"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC10 - Merchant created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{$randomFullName}}\",\n    \"email\": \"{{$randomEmail}}\",\n    \"password\": \"12345\",\n    \"phone_number\": \"{{merchant_phone}}\",\n    \"nid\": \"9876543111\",\n    \"role\": \"Merchant\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"create"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "03_System Deposit",
+			"item": [
+				{
+					"name": "TC11 - System Deposit Money (4310 TK) to Agent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC11 - Deposit successful\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var json = pm.response.json();",
+									"pm.collectionVariables.set(\"trnx_deposit\", json.trnxId || json.transactionId);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_account\": \"SYSTEM\",\n    \"to_account\": \"{{agent_phoneNum}}\",\n    \"amount\": 4310\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transaction/deposit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC12 - System Deposit Low Amount (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC12 - Low amount rejected\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_account\": \"SYSTEM\",\n    \"to_account\": \"{{agent_phoneNum}}\",\n    \"amount\": 5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transaction/deposit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC13 - System Deposit Invalid To Account (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC13 - Invalid account rejected\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_account\": \"SYSTEM\",\n    \"to_account\": \"999999999999\",\n    \"amount\": 1000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transaction/deposit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC14 - System Deposit High Amount (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC14 -  Limit exceeded and deposit rejected\", function () {",
+									"    pm.response.to.have.status(208);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_account\": \"SYSTEM\",\n    \"to_account\": \"{{agent_phoneNum}}\",\n    \"amount\": 120000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transaction/deposit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "04_Agent Transactions",
+			"item": [
+				{
+					"name": "Agent Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"agent_token\", pm.response.json().token);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone_number\": \"{{agent_phoneNum}}\",\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC15 - Agent Deposit money  to Customer1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC15 - Agent deposit money to Customer 1  successful\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_account\": \"{{agent_phoneNum}}\",\n    \"to_account\": \"{{customer1_phone}}\",\n    \"amount\": 2000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transaction/deposit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC16 - Agent Deposit Insufficient Balance (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC16 - Insufficient balance, Deposit Request rejected\", function () {",
+									"    pm.response.to.have.status(208);",
+									"});",
+									"",
+									"const jsonData=pm.response.json();",
+									"pm.test(\"Insufficient balance, Current Balance is less than expected\", function () {",
+									"    pm.expect(jsonData.message).to.equal(\"Insufficient balance\")});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_account\": \"{{agent_phoneNum}}\",\n    \"to_account\": \"{{customer1_phone}}\",\n    \"amount\": 100000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transaction/deposit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "05_Customer Transactions",
+			"item": [
+				{
+					"name": "Customer1 Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"customer1_token\", pm.response.json().token);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer ((access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone_number\": \"{{customer1_phone}}\",\n    \"password\": \"12345\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC18 - Customer1 Send Money  to Customer2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC18 - Send money successful\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var json = pm.response.json();",
+									"pm.collectionVariables.set(\"trnx_sendmoney\", json.trnxId);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_account\": \"{{customer1_phone}}\",\n    \"to_account\": \"{{customer2_phone}}\",\n    \"amount\": 1000.50\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transaction/sendmoney",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"sendmoney"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC19 - Send Money to Self (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC19 - Send to self rejected\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_account\": \"{{customer1_phone}}\",\n    \"to_account\": \"{{customer1_phone}}\",\n    \"amount\": 100\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transaction/sendmoney",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"sendmoney"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC20 - Send Money Negative Amount (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC19 - Negative amount rejected\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{customer1_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_account\": \"{{customer1_phone}}\",\n    \"to_account\": \"{{customer2_phone}}\",\n    \"amount\": -100\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transaction/sendmoney",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"sendmoney"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "06_Payment & Withdrawal",
+			"item": [
+				{
+					"name": "Customer2 Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"customer2_token\", pm.response.json().token);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone_number\": \"{{customer2_phone}}\",\n    \"password\": \"12345\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC21 - Customer2 Withdraw money to Agent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC21 - Withdraw successful\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_account\": \"{{customer2_phone}}\",\n    \"to_account\": \"{{agent_phoneNum}}\",\n    \"amount\": 100\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transaction/withdraw",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"withdraw"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC22 - Customer2 Payment TK to Merchant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC22 - Payment successful\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var json = pm.response.json();",
+									"pm.collectionVariables.set(\"trnx_payment\", json.trnxId);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_account\": \"{{customer2_phone}}\",\n    \"to_account\": \"{{merchant_phone}}\",\n    \"amount\": 335\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transaction/payment",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"payment"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "07_Balance & Statement Check",
+			"item": [
+				{
+					"name": "TC17 - Check Agent Balance After Deposit and Withdraw",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC17 - Agent balance is correct\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var json = pm.response.json();",
+									"    pm.expect(json.balance).to.be.closeTo(2462, 1); ",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "bearer {{agent_token}}",
+								"type": "text"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/transaction/balance/{{agent_phoneNum}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"balance",
+								"{{agent_phoneNum}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC23 - Check Customer1 Balance After SendMoney",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC23 - Customer1 balance is updated successfully\", function () {",
+									"    pm.response.to.have.status(200)});",
+									"    var json = pm.response.json();",
+									"pm.test(\"Customer1 balance should be (2000-1000.50-5 = 994.5) TK\", function (){",
+									"    pm.expect(json.balance).eql(994.5)});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/transaction/balance/{{customer1_phone}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"balance",
+								"{{customer1_phone}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC24 - Check Customer2 Balance",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC23 - Customer2 balance correct and updated successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var json = pm.response.json();",
+									"    pm.expect(json.balance).to.be.closeTo(555, 1);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/transaction/balance/{{customer2_phone}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"balance",
+								"{{customer2_phone}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC25 -  Check Customer2 Transaction Statement",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC24 - Transaction list returned with details.\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var json = pm.response.json();",
+									"    pm.expect(json.transactions[0]).to.have.property('trnxId'); ",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/transaction/statement/{{customer2_phone}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"statement",
+								"{{customer2_phone}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC26 - Search Transaction by trnxId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC26 - Transaction search successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"TC26 - Transaction count is correct\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.count).to.equal(3)});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/transaction/search/{{trnx_sendmoney}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"search",
+								"{{trnx_sendmoney}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC27 - Check Merchant Balance After Payment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC22 - Merchant balance updated and balance is correct\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var json = pm.response.json();",
+									"    pm.expect(json.balance).to.be.closeTo(340, 5);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/transaction/balance/{{merchant_phone}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"balance",
+								"{{merchant_phone}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "08_Edge & Unauthorized Cases",
+			"item": [
+				{
+					"name": "TC28 - Balance Check No Token (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC28 - Unauthorized rejected\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/transaction/balance/{{agent_phoneNum}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"balance",
+								"{{agent_phoneNum}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC29- Deposit No Token (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC29 - Unauthorized rejected\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_account\": \"SYSTEM\",\n    \"to_account\": \"{{agent_phoneNum}}\",\n    \"amount\": 100\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transaction/deposit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transaction",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC30 - Long Phone Number (Negative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"TC28 - Invalid phone rejected\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Long Phone\",\n    \"email\": \"longphone@test.com\",\n    \"password\": \"1234\",\n    \"phone_number\": \"019999999999999999\",\n    \"nid\": \"9999999999999\",\n    \"role\": \"Customer\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TC31 - Invalid log in request with single Space",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Use Valid email or Phone number!\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-AUTH-SECRET-KEY",
+								"value": "{{secret_key}}"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acess_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \" \",\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://dmoney.roadtocareer.net"
+		},
+		{
+			"key": "secret_key",
+			"value": "ROADTOSDET"
+		},
+		{
+			"key": "acess_token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWVyIjoiYWRtaW5AZG1vbmV5LmNvbSIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc2NDk0ODk4MywiZXhwIjoxNzY0OTUyNTgzfQ.OC5f0UuhEYGOyriWTm_Pz1jAJuQ-4XiiLhj1wqeTcLM"
+		},
+		{
+			"key": "agent_phoneNum",
+			"value": "01205493869"
+		},
+		{
+			"key": "agent_userId",
+			"value": 100638
+		},
+		{
+			"key": "Duplicate_phoneNum",
+			"value": "01201665210"
+		},
+		{
+			"key": "extra_phoneNum",
+			"value": "01201017560"
+		},
+		{
+			"key": "customer1_phone",
+			"value": "01203317553"
+		},
+		{
+			"key": "customer2_phone",
+			"value": "01208549917"
+		},
+		{
+			"key": "merchant_phone",
+			"value": "01203490612"
+		},
+		{
+			"key": "trnx_deposit",
+			"value": "TXN392798"
+		},
+		{
+			"key": "agent_token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWVyIjoiMDEyMDIyMDQ4NTEiLCJyb2xlIjoiQWdlbnQiLCJpYXQiOjE3NjQ5MzUyNTUsImV4cCI6MTc2NDkzODg1NX0.z_j8NFnZw6kDlTFC65CODk5qFBWaDaNQ6w3Hhfck0gk"
+		},
+		{
+			"key": "customer1_token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWVyIjoiMDEyMDE5Mjg5MzgiLCJyb2xlIjoiQ3VzdG9tZXIiLCJpYXQiOjE3NjQ5NTAwMzMsImV4cCI6MTc2NDk1MzYzM30.VNxJwQB4TQ6ikB1uagVi90n0gzg_-kqYhEfovYy5evU"
+		},
+		{
+			"key": "trnx_sendmoney",
+			"value": "TXN845476"
+		},
+		{
+			"key": "customer2_token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWVyIjoiMDEyMDE0NjQxNjYiLCJyb2xlIjoiQ3VzdG9tZXIiLCJpYXQiOjE3NjQ5MzUyNTYsImV4cCI6MTc2NDkzODg1Nn0.5PquHQ0fGfnbsZ15nit5yqgomF0SGDqW1qOOp21EYJg"
+		},
+		{
+			"key": "trnx_payment",
+			"value": "TXN775671"
+		}
+	]
+}
