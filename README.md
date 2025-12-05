@@ -48,6 +48,6 @@ https://docs.google.com/spreadsheets/d/12wFCmD18ZSzNzx8ApTWaR6cKClPA8dC5/edit?us
 
 ### Contributor:
 - Author: Syed Shahanur Mahmud Pranto
-  `Email: prantosm33@gmail.com ( Mail for further enquire or files)`
+  `Email: prantosm33@gmail.com (Mail for further enquire or files)`
 - Reviewer Email: salmansrabon@gmail.com
 
